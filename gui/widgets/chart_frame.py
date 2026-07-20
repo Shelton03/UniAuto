@@ -7,4 +7,6 @@ class ChartFrame(ctk.CTkFrame):
     def set_figure(self, figure) -> None:
         if self.canvas: self.canvas.get_tk_widget().destroy()
         self.canvas = FigureCanvasTkAgg(figure, master=self)
-        self.canvas.draw(); self.canvas.get_tk_widget().pack(fill="both", expand=True, padx=4, pady=4)
+        widget = self.canvas.get_tk_widget()
+        widget.configure(bg="#141f30", highlightthickness=0)
+        self.canvas.draw(); widget.pack(fill="both", expand=True, padx=4, pady=4)

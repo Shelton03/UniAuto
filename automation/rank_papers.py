@@ -1,17 +1,34 @@
 from __future__ import annotations
+import re
 from datetime import date, timedelta
 from automation.config import names
 
+AI_CONTEXT = {"ai", "artificial", "intelligence", "machine", "learning", "model", "models", "llm", "llms", "neural", "deep", "algorithm", "algorithms", "computational"}
+
+def _words(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9]+", text.casefold()))
+
+def _contains_phrase(phrase: str, text: str) -> bool:
+    return bool(re.search(r"(?<!\w)" + re.escape(phrase.casefold()) + r"(?!\w)", text))
+
 def _match_text(tracked: list[str], text: str) -> list[str]:
-    return [name for name in tracked if name.casefold() in text]
+    words = _words(text)
+    matches = []
+    for name in tracked:
+        # A standalone broad term such as "Reasoning" is only research-ML
+        # content when the same record has an AI/ML signal. This prevents
+        # religious, legal, and philosophical uses of the word from matching.
+        if _contains_phrase(name, text) and (len(_words(name)) > 1 or words & AI_CONTEXT):
+            matches.append(name)
+    return matches
 
 def _match_question(tracked: list[str], text: str) -> list[str]:
     """Match a full question where possible, otherwise all meaningful words."""
     hits = []
     for question in tracked:
         phrase = question.casefold()
-        words = [word for word in phrase.replace("/", " ").split() if len(word) > 2 and word not in {"and", "the", "with", "for", "are"}]
-        if phrase in text or (words and all(word in text for word in words)):
+        words = [word for word in _words(phrase) if (len(word) > 2 or word == "ai") and word not in {"and", "the", "with", "for", "are"}]
+        if _contains_phrase(phrase, text) or (words and all(word in _words(text) for word in words)):
             hits.append(question)
     return hits
 

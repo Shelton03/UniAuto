@@ -1,6 +1,7 @@
 from __future__ import annotations
 import hashlib
 import os
+import re
 import time
 from datetime import date
 from urllib.parse import quote
@@ -29,7 +30,37 @@ def _normal(title, source, *, authors=None, abstract="", url="", doi="", publish
 def _queries(config):
     # Universities are enrichment tags only. Searching them would flood the
     # digest with unrelated work from large institutions.
-    return names(config, "research_questions") + names(config, "research_areas") + names(config, "researchers")
+    areas = [f"AI {area}" if area.casefold() == "reasoning" else area for area in names(config, "research_areas")]
+    return names(config, "research_questions") + areas + names(config, "researchers")
+
+def _title_key(title: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", title.casefold()).strip()
+
+def _source_weight(item: dict) -> tuple[int, int, int]:
+    """Prefer a record with an abstract, DOI, and a paper-focused source."""
+    priority = {"semantic_scholar": 3, "arxiv": 2, "openalex": 1}
+    return (bool(item.get("abstract")), bool(item.get("doi")), priority.get(item.get("source"), 0))
+
+def _merge_paper_records(items: list[dict]) -> list[dict]:
+    """One review card per publication even when APIs use different IDs."""
+    merged: dict[str, dict] = {}
+    for item in items:
+        # DOI quality differs by provider; title is the common cross-source
+        # identity for the review digest, with DOI retained on the chosen item.
+        key = f"title:{_title_key(item['title'])}"
+        existing = merged.get(key)
+        if not existing:
+            merged[key] = item
+            continue
+        preferred, alternate = (item, existing) if _source_weight(item) > _source_weight(existing) else (existing, item)
+        preferred["authors"] = list(dict.fromkeys(preferred.get("authors", []) + alternate.get("authors", [])))
+        preferred["universities"] = list(dict.fromkeys(preferred.get("universities", []) + alternate.get("universities", [])))
+        if not preferred.get("abstract"):
+            preferred["abstract"] = alternate.get("abstract", "")
+        if not preferred.get("doi"):
+            preferred["doi"] = alternate.get("doi", "")
+        merged[key] = preferred
+    return list(merged.values())
 
 def discover_arxiv(config: dict) -> list[dict]:
     items = []
@@ -94,4 +125,4 @@ def discover_papers(config: dict) -> list[dict]:
         if not os.getenv("SEMANTIC_SCHOLAR_API_KEY"):
             print("Semantic Scholar: no API key configured; shared anonymous requests may be throttled.")
         semantic = discover_semantic_scholar(config); result += semantic; print(f"Semantic Scholar: {len(semantic)} candidates.")
-    return list({item["id"]: item for item in result}.values())
+    return _merge_paper_records(result)

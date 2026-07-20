@@ -4,8 +4,8 @@ import customtkinter as ctk
 
 class LogConsole(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs); self.queue: queue.Queue[str] = queue.Queue()
-        self.text = ctk.CTkTextbox(self, state="disabled", wrap="word")
+        super().__init__(master, fg_color="#101827", corner_radius=12, **kwargs); self.queue: queue.Queue[str] = queue.Queue()
+        self.text = ctk.CTkTextbox(self, state="disabled", wrap="word", fg_color="#0b1220", text_color="#c9d7ea", font=ctk.CTkFont(family="Consolas", size=12))
         self.text.pack(fill="both", expand=True, padx=8, pady=8); self.after(80, self._drain)
     def write(self, message: str) -> None: self.queue.put(message)
     def clear(self) -> None:
