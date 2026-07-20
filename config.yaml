@@ -1,0 +1,40 @@
+research_questions:
+  - name: "Brain and AI similarities"
+    date_added: "2026-05-01"
+  - name: "AI reasoning"
+    date_added: "2026-07-10"
+research_areas:
+  - name: "NeuroAI"
+    date_added: "2026-05-01"
+  - name: "Representation learning"
+    date_added: "2026-05-01"
+  - name: "Mechanistic interpretability"
+    date_added: "2026-05-01"
+  - name: "Reasoning"
+    date_added: "2026-07-10"
+universities:
+  - name: "Oxford"
+    date_added: "2026-05-01"
+  - name: "Cambridge"
+    date_added: "2026-05-01"
+  - name: "Edinburgh"
+    date_added: "2026-05-01"
+  - name: "Imperial"
+    date_added: "2026-05-01"
+researchers:
+  - name: "James Whittington"
+    date_added: "2026-05-01"
+  - name: "Simon Stringer"
+    date_added: "2026-05-01"
+sources:
+  arxiv: true
+  openalex: true
+  semantic_scholar: true
+  university_rss: true
+  duckduckgo_trending: true   # current article-level trending news via Google News RSS (legacy key name)
+lookback_days: 90
+zotero:
+  collection_name: "00 Inbox"
+obsidian:
+  vault_path: "C:/Users/user/Documents/Research OS"
+  landing_folder: "AutoLanding"

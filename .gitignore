@@ -1,0 +1,6 @@
+.env
+uni_venv/
+__pycache__/
+*.pyc
+state.db
+.streamlit/

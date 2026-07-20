@@ -1,0 +1,7 @@
+requests>=2.31
+feedparser>=6.0
+PyYAML>=6.0
+customtkinter>=5.2
+matplotlib>=3.8
+pyzotero>=1.5
+python-dotenv>=1.0
